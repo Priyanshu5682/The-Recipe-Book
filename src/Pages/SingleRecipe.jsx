@@ -1,22 +1,46 @@
+import { useContext } from "react"
+import { useParams } from "react-router-dom"
+import { recipecontext } from "../context/RecipeContext"
 import { useForm } from "react-hook-form";
-import { nanoid } from "nanoid";
-import { useContext } from "react";
-import { recipecontext } from "../context/RecipeContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-const Create = () => {
+const SingleRecipe = () => {
   const { data, setdata } = useContext(recipecontext);
-  const { register, handleSubmit, reset } = useForm();
+  const { id } = useParams()
+  const recipe = data.find((recipe) => recipe.id === Number(id))
+  const { register, handleSubmit, reset } = useForm({defaultValues: {
+      image: recipe.image,  
+      title: recipe.title,
+      chef: recipe.chef,
+      desc: recipe.desc,
+      ingr: recipe.ingr,
+      categories: recipe.categories 
+  }
+});
   const navigate = useNavigate();
   const SubmitHandler = (recipe) => {
-    recipe.id = nanoid();
-    setdata([...data, recipe]);
-    toast.success("Recipe created successfully");
-    reset();
-    navigate("/recipes");
+    const index = data.findIndex((recipe) => recipe.id === Number(id)) 
+    const copydata = [...data]
+    copydata[index] = {...copydata[index], ...recipe}
+    setdata(copydata)
+    toast.success("Recipe updated successfully");
+    
   };
-  return (
-    <form onSubmit={handleSubmit(SubmitHandler)}>
+  
+  const deleteHandler = () => {
+    const filtereddata = data.filter((recipe) => recipe.id !== Number(id))
+    setdata(filtereddata)
+    toast.success("Recipe deleted successfully");
+    navigate("/recipes");
+  }
+  return recipe ? (
+    <div className="w-full flex">
+      <div className="left w-1/2 p-2">
+        <h1 className="text-5xl font-black">{recipe.title}</h1>
+        <img className="h-[20vh]" src={recipe.image} alt={recipe.title} />
+        <h1 className="text-2xl font-bold">by {recipe.chef}</h1>
+      </div>
+      <form className="w-1/2 p-2" onSubmit={handleSubmit(SubmitHandler)}>
       <input
         className="block border-b outline-0 p-2"
         {...register("image")}
@@ -35,6 +59,7 @@ const Create = () => {
       <input
         className="block border-b outline-0 p-2"
         {...register("chef")}
+
         type="text"
         placeholder="Chef Name"
       />
@@ -52,11 +77,13 @@ const Create = () => {
       <textarea
         className="block border-b outline-0 p-2"
         {...register("ingr")}
+  
         placeholder="Recipe Ingredients"
       ></textarea>
       <select
         className="block border-b outline-0 p-2"
         {...register("categories")}
+
       >
         <option value="breakfast">Breakfast</option>
         <option value="lunch">Lunch</option>
@@ -66,11 +93,17 @@ const Create = () => {
       <small className="text-red-400 text-lg">
         This is how the error is shown
       </small>
-      <button className="mt-5 block bg-gray-900 text-white px-4 py-2 rounded">
-        Save Recipe
+      <button className="mt-5 block bg-blue-900 text-white px-4 py-2 rounded">
+        Update Recipe
+      </button>
+      <button onClick={deleteHandler} className="mt-5 block bg-red-900 text-white px-4 py-2 rounded">
+        Delete Recipe
       </button>
     </form>
-  );
-};
+    </div>
+  ) : (
+    <p>Loading...</p>
+  )
+}
 
-export default Create;
+export default SingleRecipe
