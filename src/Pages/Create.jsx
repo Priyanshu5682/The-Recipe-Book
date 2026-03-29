@@ -8,9 +8,14 @@ const Create = () => {
   const { data, setdata } = useContext(recipecontext);
   const { register, handleSubmit, reset } = useForm();
   const navigate = useNavigate();
+
   const SubmitHandler = (recipe) => {
     recipe.id = nanoid();
-    setdata([...data, recipe]);
+    const copydata = [...data]
+    copydata.push(recipe)
+    setdata(copydata);
+    localStorage.setItem('recipe',JSON.stringify(copydata))
+
     toast.success("Recipe created successfully");
     reset();
     navigate("/recipes");

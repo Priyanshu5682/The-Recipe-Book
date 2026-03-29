@@ -4,25 +4,27 @@ import { recipecontext } from "../context/RecipeContext"
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useEffect } from "react";
 const SingleRecipe = () => {
   const { data, setdata } = useContext(recipecontext);
   const { id } = useParams()
   const recipe = data.find((recipe) => recipe.id === Number(id))
   const { register, handleSubmit, reset } = useForm({defaultValues: {
-      image: recipe.image,  
-      title: recipe.title,
-      chef: recipe.chef,
-      desc: recipe.desc,
-      ingr: recipe.ingr,
-      categories: recipe.categories 
+      image: recipe?.image,  
+      title: recipe?.title,
+      chef: recipe?.chef,
+      desc: recipe?.desc,
+      ingr: recipe?.ingr,
+      categories: recipe?.categories 
   }
 });
   const navigate = useNavigate();
-  const SubmitHandler = (recipe) => {
+  const UpdateHandler = (recipe) => {
     const index = data.findIndex((recipe) => recipe.id === Number(id)) 
     const copydata = [...data]
     copydata[index] = {...copydata[index], ...recipe}
     setdata(copydata)
+    localStorage.setItem('recipe',JSON.stringify(copydata))
     toast.success("Recipe updated successfully");
     
   };
@@ -30,9 +32,18 @@ const SingleRecipe = () => {
   const deleteHandler = () => {
     const filtereddata = data.filter((recipe) => recipe.id !== Number(id))
     setdata(filtereddata)
+    localStorage.setItem('recipe',JSON.stringify(filtereddata))
     toast.success("Recipe deleted successfully");
     navigate("/recipes");
   }
+  useEffect(()=>{
+      console.log('component mounted');
+      return () => {
+        console.log('component unmounted');
+        
+      }
+    },[]) //[] here means dependency array
+
   return recipe ? (
     <div className="w-full flex">
       <div className="left w-1/2 p-2">
@@ -40,7 +51,7 @@ const SingleRecipe = () => {
         <img className="h-[20vh]" src={recipe.image} alt={recipe.title} />
         <h1 className="text-2xl font-bold">by {recipe.chef}</h1>
       </div>
-      <form className="w-1/2 p-2" onSubmit={handleSubmit(SubmitHandler)}>
+      <form className="w-1/2 p-2" onSubmit={handleSubmit(UpdateHandler)}>
       <input
         className="block border-b outline-0 p-2"
         {...register("image")}
@@ -107,3 +118,4 @@ const SingleRecipe = () => {
 }
 
 export default SingleRecipe
+

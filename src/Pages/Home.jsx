@@ -24,11 +24,12 @@
 // export default Home
 
 
-import axios from 'axios'
+import { useEffect } from 'react';
+import axios from '../utils/axios'
 const Home = () => {
   const getproduct = async () => {
     try {
-      const {data} = await axios.get('https://fakestoreapi.com/products/1')
+      const {data} = await axios.get('/products')
       console.log(data);
       
     } catch (error) {
@@ -36,7 +37,14 @@ const Home = () => {
       
     }
   }
-  
+  useEffect(()=>{
+    console.log('component mounted');
+    getproduct()
+    return () => {
+      console.log('component unmounted');
+      
+    }
+  })
   return (
     <div>
       <h1>Home</h1>
@@ -47,3 +55,4 @@ const Home = () => {
 }
 
 export default Home
+
